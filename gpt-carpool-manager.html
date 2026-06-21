@@ -1094,6 +1094,7 @@
                 <th>用户名</th>
                 <th>微信</th>
                 <th>所属账号</th>
+                <th>账号到期</th>
                 <th>套餐</th>
                 <th>加入日期</th>
                 <th>到期日期</th>
@@ -1912,12 +1913,18 @@
         var rowClass = status === 'expired' ? 'row-danger' : (status === 'expiring' ? 'row-warning' : '');
         var account = store.accounts.find(function(a) { return a.id === u.accountId; });
         var accountName = account ? account.name : '未知';
+        var accExpire = account && account.expireDate ? account.expireDate : null;
+        var accDays = accExpire ? daysUntil(accExpire) : null;
+        var accExpireHtml = accExpire ?
+          '<span style="' + (accDays < 0 ? 'color:var(--danger);' : (accDays <= 7 ? 'color:var(--warning);' : '')) + '">' +
+          formatDate(accExpire) + ' <span style="font-size:0.7rem;">(' + (accDays < 0 ? '过期' + Math.abs(accDays) + '天' : accDays + '天') + ')</span></span>' : '-';
         var paidHtml = '<span class="paid-badge ' + (u.paid ? 'paid' : 'unpaid') + '" onclick="togglePaid(\'' + u.id + '\')" title="点击切换付款状态">' + (u.paid ? '&#10003; 已付' : '&#10007; 未付') + '</span>';
 
         tableHtml += '<tr class="' + rowClass + '">' +
           '<td><strong>' + esc(u.name) + '</strong></td>' +
           '<td>' + esc(u.wechat || '-') + '</td>' +
           '<td><span class="account-tag">' + esc(accountName) + '</span></td>' +
+          '<td>' + accExpireHtml + '</td>' +
           '<td>' + esc(u.plan || '-') + '</td>' +
           '<td>' + formatDate(u.joinDate) + '</td>' +
           '<td>' + formatDate(u.expireDate) + (days >= 0 && days <= 3 ? ' <span style="color:var(--warning);font-size:0.7rem;">(' + days + '天)</span>' : '') + (days < 0 ? ' <span style="color:var(--danger);font-size:0.7rem;">(过期' + Math.abs(days) + '天)</span>' : '') + '</td>' +
