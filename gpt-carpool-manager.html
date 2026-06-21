@@ -1951,8 +1951,108 @@
       return div.innerHTML;
     }
 
+    // ==================== Seed Data ====================
+    function seedData() {
+      if (store.accounts.length > 0 || store.users.length > 0) return; // already has data
+
+      var now = new Date();
+      var y = now.getFullYear();
+      var m = now.getMonth();
+
+      function makeExpireDate(day) {
+        // day is like 5, 16, 26 etc. of current or next month
+        var d = new Date(y, m, day);
+        if (d < now) d = new Date(y, m + 1, day);
+        return d.toISOString().split('T')[0];
+      }
+
+      // Accounts
+      var accounts = [
+        { id: 'acc1', name: 'GPT账号1', email: 'CUPgSdeBN@outlook.com.br', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc2', name: 'GPT账号2', email: 'lxeqrkctwk893@hotmail.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc3', name: 'GPT账号3', email: 'YoungchulKim281@gmail.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc4', name: 'GPT账号4', email: 'SheilaMatt9664@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc5', name: 'GPT账号5', email: 'LydiaGalindo2275@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc6', name: 'GPT账号6', email: 'TalmadgeGwilliam52510@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc7', name: 'GPT账号7', email: 'JoannaDavis7936@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
+        { id: 'acc8', name: 'GPT账号8', email: 'ChrisRexford2743@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() }
+      ];
+      store.accounts = accounts;
+
+      // Users: [name, wechat, accountId, fee, paid, expireDay]
+      var userData = [
+        // 账号1
+        ['一页书', 'zjkynl', 'acc1', 50, false, 16],
+        ['Love life', 'C2009889', 'acc1', 50, false, 16],
+        ['Tracy😈', 'Tracyxdxd01', 'acc1', 50, false, 15],
+        ['照桥心美', 'xinxin20030226', 'acc1', 50, false, 15],
+        ['💎大璐走大路💋 👉', 'sunny-lulu63', 'acc1', 50, false, 19],
+        // 账号2
+        ['李要控计李计几', 'Seanfly-Zz1126', 'acc2', 50, false, 16],
+        ['甜甜甜家小赘婿', 'ck18796240788', 'acc2', 50, false, 17],
+        ['思念', 'snyaokaixin', 'acc2', 50, false, 16],
+        ['Z.', 'SC-9468-Jay', 'acc2', 50, false, 16],
+        ['', 'ccw20070418ccw', 'acc2', 50, false, 16],
+        // 账号3
+        ['秋秋', 'Ssssunny_W', 'acc3', 50, false, 28],
+        ['梦想家Z', 'hsztzt', 'acc3', 70, true, 28],
+        ['Das Kätzchen Fernweh', 'Veci_N710', 'acc3', 70, true, 29],
+        ['R | i | C | K | Y 🥬', 'Amber257010', 'acc3', 50, false, 19],
+        ['大头蛤蟆', 'Coward_-_c', 'acc3', 50, false, 18],
+        // 账号4
+        ['土', 'RQ283864086', 'acc4', 50, false, 18],
+        ['韩冰', 'O_Oluckykoi', 'acc4', 70, true, 19],
+        ['FIKA周书逸', 'YTaylorSwift1989', 'acc4', 50, false, 19],
+        ['实变函数学十遍', 'wxid_2u8k06pdmxja22', 'acc4', 50, false, 19],
+        // 账号5
+        ['🍅不掉渣的土狗🍕', 'FSc--0010', 'acc5', 50, true, 19],
+        ['无理', 'Traveling_Light620', 'acc5', 50, true, 19],
+        ['Cheooon.', 'Syzz1940', 'acc5', 50, false, 18],
+        ['Hi,你好啊', 'A6660888AB', 'acc5', 50, true, 20],
+        // 账号6
+        ['胶鞋布衣', 'Buyishuji95', 'acc6', 70, false, 26],
+        ['刘国威', 'nwxid_00000000', 'acc6', 70, false, 26],
+        ['吉 传感器IMU', 'jn22004616', 'acc6', 50, false, 26],
+        ['树立一个人', 'ZSR18Aquiver', 'acc6', 50, false, 21],
+        ['', '', 'acc6', 50, false, 20],
+        // 账号7
+        ['十二拾贰', '_2NI-1990', 'acc7', 70, true, 21],
+        ['天末同云', 'HJuuuy', 'acc7', 70, false, 21],
+        ['S1uhy', 'Woewj-0702', 'acc7', 70, true, 26],
+        ['xanthina（gosling全肯定bot）', 'du1111115', 'acc7', 50, false, 18],
+        ['', '', 'acc7', 70, false, 21],
+        // 账号8
+        ['扑通', 'Yellowmoons', 'acc8', 50, false, 18],
+        ['李华', 'mydarling_hqxx', 'acc8', 50, false, 26],
+        ['。。。。', 'jlh18797181305', 'acc8', 70, false, 26],
+        ['DDDDDDDoris', 'a18105374501', 'acc8', 70, false, 28],
+        ['一29th.', 'qyz-2942', 'acc8', 50, false, 21]
+      ];
+
+      var users = [];
+      userData.forEach(function(row, i) {
+        users.push({
+          id: 'u' + (i + 1),
+          name: row[0],
+          wechat: row[1],
+          accountId: row[2],
+          plan: row[3] === 70 ? '三人车' : '五人车',
+          joinDate: '2025-06-01',
+          expireDate: makeExpireDate(row[5]),
+          fee: row[3],
+          renewCount: 0,
+          paid: row[4],
+          note: ''
+        });
+      });
+      store.users = users;
+      saveStore();
+      addLog('初始化数据', '导入 ' + accounts.length + ' 个账号, ' + users.length + ' 个用户');
+    }
+
     // ==================== Init ====================
     loadStore();
+    seedData();
     renderDashboard();
 
     // Set default calculator dates
