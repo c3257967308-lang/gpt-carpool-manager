@@ -1115,6 +1115,7 @@
                 <th>已用/总人数</th>
                 <th>使用率</th>
                 <th>月费(元)</th>
+                <th>账号到期</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -1379,9 +1380,15 @@
             <input type="number" id="account-monthly-fee" value="145" min="0">
           </div>
         </div>
-        <div class="form-group">
-          <label>备注</label>
-          <textarea id="account-note" rows="2" placeholder="可选"></textarea>
+        <div class="form-row">
+          <div class="form-group">
+            <label>账号到期日</label>
+            <input type="date" id="account-expire-date">
+          </div>
+          <div class="form-group">
+            <label>备注</label>
+            <input type="text" id="account-note" placeholder="可选">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -2159,7 +2166,7 @@
     // ==================== 账号管理 ====================
     function renderAccounts() {
       if (store.accounts.length === 0) {
-        document.getElementById('accounts-tbody').innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">&#9733;</div><p>还没有账号，点击上方按钮添加</p></div></td></tr>';
+        document.getElementById('accounts-tbody').innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#9733;</div><p>还没有账号，点击上方按钮添加</p></div></td></tr>';
         return;
       }
 
@@ -2170,6 +2177,10 @@
         var pct = Math.round((used / cap) * 100);
         var fillClass = pct >= 100 ? 'full' : (pct >= 80 ? 'warn' : '');
 
+        var accDays = a.expireDate ? daysUntil(a.expireDate) : null;
+        var accExpireClass = accDays !== null ? (accDays < 0 ? ' style="color:var(--danger);"' : (accDays <= 7 ? ' style="color:var(--warning);"' : '')) : '';
+        var accExpireText = a.expireDate ? formatDate(a.expireDate) + (accDays !== null ? ' <span style="font-size:0.7rem;">(' + (accDays < 0 ? '过期' + Math.abs(accDays) + '天' : accDays + '天') + ')</span>' : '') : '-';
+
         html += '<tr>' +
           '<td><strong>' + esc(a.name) + '</strong></td>' +
           '<td style="font-family:var(--font-mono);font-size:0.78rem;">' + esc(a.email || '-') + '</td>' +
@@ -2178,6 +2189,7 @@
           '<td>' + used + ' / ' + cap + '</td>' +
           '<td><div class="capacity-bar"><div class="bar"><div class="fill ' + fillClass + '" style="width:' + Math.min(pct,100) + '%"></div></div><span class="label">' + pct + '%</span></div></td>' +
           '<td style="font-family:var(--font-mono);">' + (a.monthlyFee || 0) + '</td>' +
+          '<td' + accExpireClass + '>' + accExpireText + '</td>' +
           '<td><div style="display:flex;gap:0.25rem;">' +
             '<button class="btn btn-sm" onclick="editAccount(\'' + a.id + '\')">&#9998;</button>' +
             '<button class="btn btn-sm" onclick="confirmDeleteAccount(\'' + a.id + '\')" style="color:var(--danger);">&#128465;</button>' +
@@ -2198,6 +2210,7 @@
           document.getElementById('account-email').value = a.email || '';
           document.getElementById('account-plan').value = a.plan || '三人车';
           document.getElementById('account-monthly-fee').value = a.monthlyFee || 145;
+          document.getElementById('account-expire-date').value = a.expireDate || '';
           document.getElementById('account-note').value = a.note || '';
         }
       } else {
@@ -2205,6 +2218,7 @@
         document.getElementById('account-email').value = '';
         document.getElementById('account-plan').value = '三人车';
         document.getElementById('account-monthly-fee').value = 145;
+        document.getElementById('account-expire-date').value = '';
         document.getElementById('account-note').value = '';
       }
       openModal('modal-account');
@@ -2220,6 +2234,7 @@
         email: document.getElementById('account-email').value.trim(),
         plan: document.getElementById('account-plan').value,
         monthlyFee: parseInt(document.getElementById('account-monthly-fee').value) || 145,
+        expireDate: document.getElementById('account-expire-date').value,
         note: document.getElementById('account-note').value.trim()
       };
 
@@ -2614,14 +2629,14 @@
 
       // 8个账号
       var accounts = [
-        { id: 'acc1', name: 'CUPgSdeBN@outlook.com.br', email: 'CUPgSdeBN@outlook.com.br', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc2', name: 'lxeqrkctwk893@hotmail.com', email: 'lxeqrkctwk893@hotmail.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc3', name: 'YoungchulKim281@gmail.com', email: 'YoungchulKim281@gmail.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc4', name: 'SheilaMatt9664@outlook.com', email: 'SheilaMatt9664@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc5', name: 'LydiaGalindo2275@outlook.com', email: 'LydiaGalindo2275@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc6', name: 'TalmadgeGwilliam52510@outlook.com', email: 'TalmadgeGwilliam52510@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc7', name: 'JoannaDavis7936@outlook.com', email: 'JoannaDavis7936@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() },
-        { id: 'acc8', name: 'ChrisRexford2743@outlook.com', email: 'ChrisRexford2743@outlook.com', plan: '五人车', monthlyFee: 145, note: '', createdAt: Date.now() }
+        { id: 'acc1', name: 'CUPgSdeBN@outlook.com.br', email: 'CUPgSdeBN@outlook.com.br', plan: '五人车', monthlyFee: 145, expireDate: '2025-07-05', note: '', createdAt: Date.now() },
+        { id: 'acc2', name: 'lxeqrkctwk893@hotmail.com', email: 'lxeqrkctwk893@hotmail.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-07-16', note: '', createdAt: Date.now() },
+        { id: 'acc3', name: 'YoungchulKim281@gmail.com', email: 'YoungchulKim281@gmail.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-06-26', note: '', createdAt: Date.now() },
+        { id: 'acc4', name: 'SheilaMatt9664@outlook.com', email: 'SheilaMatt9664@outlook.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-06-23', note: '', createdAt: Date.now() },
+        { id: 'acc5', name: 'LydiaGalindo2275@outlook.com', email: 'LydiaGalindo2275@outlook.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-06-23', note: '', createdAt: Date.now() },
+        { id: 'acc6', name: 'TalmadgeGwilliam52510@outlook.com', email: 'TalmadgeGwilliam52510@outlook.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-07-17', note: '', createdAt: Date.now() },
+        { id: 'acc7', name: 'JoannaDavis7936@outlook.com', email: 'JoannaDavis7936@outlook.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-06-23', note: '', createdAt: Date.now() },
+        { id: 'acc8', name: 'ChrisRexford2743@outlook.com', email: 'ChrisRexford2743@outlook.com', plan: '五人车', monthlyFee: 145, expireDate: '2025-07-17', note: '', createdAt: Date.now() }
       ];
       store.accounts = accounts;
 
