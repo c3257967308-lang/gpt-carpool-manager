@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GPT 拼车管理系统</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @font-face {
       font-family: 'InstrumentSans';
@@ -1130,6 +1131,22 @@
   </div>
 
   <script>
+    // ==================== Cloud Config ====================
+    var SUPABASE_URL = 'https://ebrzdghrzotwrnkimpzi.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVicnpkZ2hyem90d3Jua2ltcHppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDQ3NjQsImV4cCI6MjA5NzYyMDc2NH0.29EyMKsL9TYMVRtlUbwPA3pAaFfsJlf3JvfPQRQVZIo';
+    var supabaseClient = null;
+    var cloudReady = false;
+
+    function initCloud() {
+      try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        cloudReady = true;
+      } catch(e) {
+        console.warn('Supabase init failed:', e);
+        cloudReady = false;
+      }
+    }
+
     // ==================== Data Store ====================
     var store = {
       users: [],
@@ -1155,6 +1172,38 @@
       try {
         localStorage.setItem('gpt-carpool-data', JSON.stringify(store));
       } catch(e) { console.error('Save error:', e); }
+      // Sync to cloud
+      if (cloudReady) {
+        supabaseClient.from('app_state').upsert(
+          { id: 'main', data: store },
+          { onConflict: 'id' }
+        ).then(function(res) {
+          if (res.error) console.warn('Cloud save error:', res.error);
+        }).catch(function(e) { console.warn('Cloud save failed:', e); });
+      }
+    }
+
+    function loadFromCloud() {
+      if (!cloudReady) return Promise.resolve(false);
+      return supabaseClient.from('app_state').select('data').eq('id', 'main').single()
+        .then(function(res) {
+          if (res.error) {
+            console.warn('Cloud load error:', res.error);
+            return false;
+          }
+          if (res.data && res.data.data) {
+            store = res.data.data;
+            if (!store.waitlist) store.waitlist = [];
+            if (!store.logs) store.logs = [];
+            if (!store.settings) store.settings = {};
+            localStorage.setItem('gpt-carpool-data', JSON.stringify(store));
+            return true;
+          }
+          return false;
+        }).catch(function(e) {
+          console.warn('Cloud load failed:', e);
+          return false;
+        });
     }
 
     function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
@@ -2051,8 +2100,24 @@
     }
 
     // ==================== Init ====================
+    initCloud();
     loadStore();
     seedData();
+
+    // Try to load from cloud, then render
+    if (cloudReady) {
+      loadFromCloud().then(function(loaded) {
+        if (loaded) {
+          // Cloud data loaded, re-render
+          renderDashboard();
+          showToast('云端数据已同步', 'success');
+        } else {
+          // No cloud data yet, push local data to cloud
+          saveStore();
+        }
+      });
+    }
+
     renderDashboard();
 
     // Set default calculator dates
