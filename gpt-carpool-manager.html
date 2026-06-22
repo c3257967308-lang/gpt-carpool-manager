@@ -1137,6 +1137,8 @@
             <tbody id="accounts-tbody"></tbody>
           </table>
         </div>
+        <!-- 手机端卡片列表 -->
+        <div class="user-card-list" id="accounts-card-list"></div>
       </div>
 
       <!-- ==================== 候补排队 ==================== -->
@@ -2218,12 +2220,15 @@
 
     // ==================== 账号管理 ====================
     function renderAccounts() {
+      var cardList = document.getElementById('accounts-card-list');
       if (store.accounts.length === 0) {
         document.getElementById('accounts-tbody').innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">&#9733;</div><p>还没有账号，点击上方按钮添加</p></div></td></tr>';
+        if (cardList) cardList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#9733;</div><p>还没有账号，点击上方按钮添加</p></div>';
         return;
       }
 
       var html = '';
+      var cardHtml = '';
       store.accounts.forEach(function(a) {
         var cap = getCapacity(a.plan);
         var used = store.users.filter(function(u) { return u.accountId === a.id && getUserStatus(u.expireDate) !== 'expired'; }).length;
@@ -2234,6 +2239,7 @@
         var accExpireClass = accDays !== null ? (accDays < 0 ? ' style="color:var(--danger);"' : (accDays <= 7 ? ' style="color:var(--warning);"' : '')) : '';
         var accExpireText = a.expireDate ? formatDate(a.expireDate) + (accDays !== null ? ' <span style="font-size:0.7rem;">(' + (accDays < 0 ? '过期' + Math.abs(accDays) + '天' : accDays + '天') + ')</span>' : '') : '-';
 
+        // 表格行
         html += '<tr>' +
           '<td><strong>' + esc(a.name) + '</strong></td>' +
           '<td style="font-family:var(--font-mono);font-size:0.78rem;">' + esc(a.email || '-') + '</td>' +
@@ -2248,8 +2254,25 @@
             '<button class="btn btn-sm" onclick="confirmDeleteAccount(\'' + a.id + '\')" style="color:var(--danger);">&#128465;</button>' +
           '</div></td>' +
           '</tr>';
+
+        // 手机端卡片
+        cardHtml += '<div class="user-card">' +
+          '<div class="user-card-header">' +
+            '<div class="user-card-name">' + esc(a.name) + '</div>' +
+            '<div class="user-card-status">' + used + '/' + cap + '人 (' + pct + '%)</div>' +
+          '</div>' +
+          '<div class="user-card-row"><span class="label">邮箱:</span> <span class="value">' + esc(a.email || '-') + '</span></div>' +
+          '<div class="user-card-row"><span class="label">套餐:</span> <span class="value">' + esc(a.plan || '-') + '</span></div>' +
+          '<div class="user-card-row"><span class="label">月费:</span> <span class="value">' + (a.monthlyFee || 0) + '元</span></div>' +
+          '<div class="user-card-row"><span class="label">到期:</span> <span class="value"' + accExpireClass + '>' + accExpireText + '</span></div>' +
+          '<div class="user-card-actions">' +
+            '<button class="btn btn-sm" onclick="editAccount(\'' + a.id + '\')">&#9998; 编辑</button>' +
+            '<button class="btn btn-sm" onclick="confirmDeleteAccount(\'' + a.id + '\')" style="color:var(--danger);">&#128465; 删除</button>' +
+          '</div>' +
+          '</div>';
       });
       document.getElementById('accounts-tbody').innerHTML = html;
+      if (cardList) cardList.innerHTML = cardHtml;
     }
 
     function showAccountModal(accountId) {
